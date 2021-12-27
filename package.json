@@ -4,13 +4,9 @@
   "description": "",
   "main": ".webpack/main",
   "scripts": {
-    "build": "webpack --config webpack.config.main.js && webpack --config webpack.config.renderer.js && webpack --config webpack.config.preload.js",
     "build-preload": "webpack --config webpack.config.preload.js",
     "build-preload-prod": "webpack --config webpack.config.preload.js --mode production --no-devtool",
-    "build-prod": "webpack --config webpack.config.main.js --mode production --no-devtool && webpack --config webpack.config.renderer.js --mode production --no-devtool && webpack --config webpack.config.preload.js --mode production --no-devtool",
     "build-pug": "pug src/pug/index.pug --out dist",
-    "build-css": "webpack --config webpack.config.css.js",
-    "build-html-css": "npm run build-pug && npm run build-css",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make"
