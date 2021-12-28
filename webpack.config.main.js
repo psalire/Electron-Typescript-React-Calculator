@@ -6,7 +6,7 @@ const SCRIPTS_PATH = './src/ts/';
 module.exports = {
     target: 'electron-main',
     entry: {
-        'index': path.resolve(SCRIPTS_PATH, 'index.ts'),
+        'index': path.resolve(SCRIPTS_PATH, 'index.tsx'),
     },
     ...build_config,
 };

@@ -5,13 +5,13 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(t|j)s$/,
+                test: /\.(t|j)sx?$/,
                 exclude: /(node_modules|\.webpack)/,
                 loader: 'babel-loader'
             }
         ],
     },
     resolve: {
-        extensions: ['.ts', '.js']
+        extensions: ['.tsx', '.js']
     }
 };
