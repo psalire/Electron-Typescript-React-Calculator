@@ -1,17 +1,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Renderable from './Renderable';
 
 interface ContainerProps {
     content?: string;
 }
 
-export default class Container implements Renderable {
+export default class Container extends React.Component<ContainerProps,{}> {
 
-    public static elem(props?: ContainerProps): JSX.Element {
+    public render(): JSX.Element {
         return (
-            <div>{props.content}</div>
+            <div>{this.props.content}</div>
         );
     }
 }

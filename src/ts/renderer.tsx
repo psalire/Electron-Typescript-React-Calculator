@@ -7,7 +7,7 @@ import Container from './react-components/Container';
 console.log('👋 This message is being logged by "renderer.js", included via webpack');
 
 ReactDOM.render(
-    <Container.elem
+    <Container
         content="Hello content"
     />,
     document.getElementById('react-container')
