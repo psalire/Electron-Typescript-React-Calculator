@@ -8,6 +8,7 @@
     "build-preload-prod": "webpack --config webpack.config.preload.js --mode production --no-devtool",
     "build-pug": "pug src/pug/index.pug --out dist",
     "build-css": "webpack --config webpack.config.css.js",
+    "build-css-watch": "webpack --config webpack.config.css.js --watch",
     "build-html-css": "npm run build-pug && npm run build-css",
     "start": "electron-forge start",
     "package": "electron-forge package",
