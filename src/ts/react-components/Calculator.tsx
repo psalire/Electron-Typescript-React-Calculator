@@ -21,7 +21,10 @@ export default class Calculator extends React.Component<{},{}> implements iListe
 
     public render(): JSX.Element {
         return (
-            <Container fluid>
+            <Container
+                id="calculator"
+                fluid
+            >
                 {
                     [
                         [1,2,3],
@@ -33,7 +36,7 @@ export default class Calculator extends React.Component<{},{}> implements iListe
                                 {
                                     row.map(col => {
                                         return (
-                                            <Col className="text-primary">
+                                            <Col className="m-1 p-0">
                                                 <CalculatorButton
                                                     value={col}
                                                     listener={this}
@@ -43,7 +46,7 @@ export default class Calculator extends React.Component<{},{}> implements iListe
                                     })
                                 }
                             </Row>
-                        )
+                        );
                     })
                 }
             </Container>

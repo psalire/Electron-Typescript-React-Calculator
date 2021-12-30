@@ -7,6 +7,7 @@ import {
 } from "react-bootstrap";
 
 type CalculatorButtonProps = {
+    variant?: string;
     value?: number;
     content?: string;
     listener?: iListener;
@@ -17,6 +18,8 @@ export default class CalculatorButton extends React.Component<CalculatorButtonPr
     public render(): JSX.Element {
         return (
             <Button
+                variant={this.props.variant}
+                className="calculator-button"
                 value={this.props.value}
                 onClick={() => {
                     if (this.props.listener) {

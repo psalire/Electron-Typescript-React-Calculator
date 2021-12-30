@@ -11,7 +11,7 @@ ReactDOM.render(
     document.querySelector("#main-container")
 );
 
-ReactDOM.render(
-    <div>Footer</div>,
-    document.querySelector("#footer-container")
-)
+// ReactDOM.render(
+//     <div>Footer</div>,
+//     document.querySelector("#footer-container")
+// )
