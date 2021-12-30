@@ -7,9 +7,7 @@ import Calculator from "./react-components/Calculator";
 console.log("👋 This message is being logged by \"renderer.js\", included via webpack");
 
 ReactDOM.render(
-    <Calculator
-        content="Hello content"
-    />,
+    <Calculator />,
     document.querySelector("#main-container")
 );
 
