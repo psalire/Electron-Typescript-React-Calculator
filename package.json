@@ -7,6 +7,8 @@
     "build-preload": "webpack --config webpack.config.preload.js",
     "build-preload-prod": "webpack --config webpack.config.preload.js --mode production --no-devtool",
     "build-pug": "pug src/pug/index.pug --out dist",
+    "build-css": "webpack --config webpack.config.css.js",
+    "build-html-css": "npm run build-pug && npm run build-css",
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make"
@@ -53,7 +55,8 @@
   "dependencies": {
     "@babel/runtime": "^7.16.5",
     "bootstrap": "^5.1.3",
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "react-bootstrap": "^2.0.4"
   },
   "config": {
     "forge": {

@@ -1,14 +1,19 @@
 
-import '../scss/main.scss';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import Container from './react-components/Container';
+import "../scss/main.scss";
+import React from "react";
+import ReactDOM from "react-dom";
+import Calculator from "./react-components/Calculator";
 
-console.log('👋 This message is being logged by "renderer.js", included via webpack');
+console.log("👋 This message is being logged by \"renderer.js\", included via webpack");
 
 ReactDOM.render(
-    <Container
+    <Calculator
         content="Hello content"
     />,
-    document.getElementById('react-container')
+    document.querySelector("#main-container")
 );
+
+ReactDOM.render(
+    <div>Footer</div>,
+    document.querySelector("#footer-container")
+)

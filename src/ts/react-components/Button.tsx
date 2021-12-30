@@ -2,11 +2,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-interface ContainerProps {
+type ButtonProps = {
     content?: string;
 }
 
-export default class Container extends React.Component<ContainerProps,{}> {
+export default class Button extends React.Component<ButtonProps,{}> {
 
     public render(): JSX.Element {
         return (
