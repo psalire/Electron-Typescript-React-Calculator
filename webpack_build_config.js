@@ -1,7 +1,7 @@
 
 module.exports = {
     mode: 'development',
-    devtool: 'inline-cheap-module-source-map',
+    devtool: 'eval-source-map',
     module: {
         rules: [
             {
