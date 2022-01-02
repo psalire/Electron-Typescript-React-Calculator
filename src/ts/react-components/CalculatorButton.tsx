@@ -11,7 +11,6 @@ export interface CalculatorButtonProps {
     value?: number|string;
     content?: string;
     listener?: iListener;
-    className?: string;
 }
 
 export default class CalculatorButton<T extends CalculatorButtonProps> extends React.Component<T,{}> {

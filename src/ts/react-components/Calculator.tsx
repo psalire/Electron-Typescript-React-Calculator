@@ -2,6 +2,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import CalculatorButton, { CalculatorButtonProps } from "./CalculatorButton";
+import CalculatorDisplay from "./CalculatorDisplay";
 import iListener from "../iListener";
 import {
     Col,
@@ -30,23 +31,6 @@ enum CalculatorButtonValues {
     DOT=".",
 }
 
-interface ColCalculatorButtonProps extends CalculatorButtonProps {
-    colProps?: ColProps,
-};
-
-class ColCalculatorButton extends CalculatorButton<ColCalculatorButtonProps> {
-    public render(): JSX.Element {
-        return (
-            <Col
-                className={"p-0 "+(this.props.className)}
-                {...this.props.colProps}
-            >
-                {super.render()}
-            </Col>
-        );
-    }
-}
-
 class ColVals {
     public value: number|string;
     public colProps?: ColProps;
@@ -61,7 +45,7 @@ type CalculatorState = {
     displayText: string,
 }
 
-export default class Calculator extends React.Component<CalculatorState, {}> implements iListener {
+export default class Calculator extends React.Component<{}, CalculatorState> implements iListener {
 
     state = {
         displayText: "",
@@ -87,7 +71,7 @@ export default class Calculator extends React.Component<CalculatorState, {}> imp
             >
                 <Row>
                     <Col>
-                        {this.state.displayText}
+                        <CalculatorDisplay text={this.state.displayText} />
                     </Col>
                 </Row>
                 {
@@ -124,12 +108,16 @@ export default class Calculator extends React.Component<CalculatorState, {}> imp
                                 {
                                     row.map((col, j) => {
                                         return (
-                                            <ColCalculatorButton
+                                            <Col
                                                 key={`${j}_${col.value}`}
-                                                value={col.value}
-                                                colProps={col.colProps}
-                                                listener={this}
-                                            />
+                                                className="p-0"
+                                                {...col.colProps}
+                                            >
+                                                <CalculatorButton
+                                                    value={col.value}
+                                                    listener={this}
+                                                />
+                                            </Col>
                                         );
                                     })
                                 }
