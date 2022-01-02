@@ -3,7 +3,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import CalculatorButton, { CalculatorButtonProps } from "./CalculatorButton";
 import CalculatorDisplay from "./CalculatorDisplay";
-import iListener from "../iListener";
 import iCommand from "../iCommand";
 import {
     Col,
@@ -50,6 +49,7 @@ class ColVals implements iCommand {
 
 type CalculatorState = {
     displayText: string,
+    isOperationActive: boolean,
     previousVal?: string,
 }
 
@@ -57,9 +57,10 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
 
     private static readonly MAX_DISPLAY_LENGTH = 28;
 
-    state = {
+    state: CalculatorState = {
         displayText: "",
         previousVal: "",
+        isOperationActive: false,
     };
 
     componentDidMount() {
@@ -74,7 +75,32 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
         return new class extends ColVals {
             constructor(value: number|string, superThis: Calculator, colProps?: ColProps) {
                 super(value, colProps);
-                this.ftn = (val: CalculatorButtonValues)=>superThis.update(val);
+                this.ftn = (val: CalculatorButtonValues) => {
+                    if (superThis.state.isOperationActive) {
+                        superThis.setState({
+                            displayText: "",
+                            isOperationActive: false,
+                        });
+                    }
+                    superThis.update(val);
+                }
+            }
+        }(value, this, colProps);
+    }
+
+    private createOperationButtonColVals(value: number|string, operation: Function, colProps?: ColProps) {
+        return new class extends ColVals {
+            constructor(value: number|string, superThis: Calculator, colProps?: ColProps) {
+                super(value, colProps);
+                this.ftn = (_: any) => {
+                    superThis.setState(state => {
+                        return {
+                            previousVal: state.displayText,
+                            displayText: operation(state.previousVal, state.displayText),
+                            isOperationActive: true,
+                        }
+                    });
+                };
             }
         }(value, this, colProps);
     }
@@ -130,7 +156,9 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
                             this.createNumberButtonColVals(CalculatorButtonValues.SEVEN),
                             this.createNumberButtonColVals(CalculatorButtonValues.EIGHT),
                             this.createNumberButtonColVals(CalculatorButtonValues.NINE),
-                            new ColVals(CalculatorButtonValues.ADD),
+                            this.createOperationButtonColVals(CalculatorButtonValues.ADD, (val1: string, val2: string) => {
+                                return (parseFloat(val1 || "0") + parseFloat(val2)).toString();
+                            }),
                         ],
                         [
                             this.createNumberButtonColVals(CalculatorButtonValues.ZERO, {xs:{span:6}}),
