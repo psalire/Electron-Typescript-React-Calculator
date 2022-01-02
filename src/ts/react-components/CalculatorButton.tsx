@@ -2,6 +2,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import iListener from "../iListener";
+import iCommand from "../iCommand";
 import {
     Button,
 } from "react-bootstrap";
@@ -10,7 +11,7 @@ export interface CalculatorButtonProps {
     variant?: string;
     value?: number|string;
     content?: string;
-    listener?: iListener;
+    commandObj?: iCommand;
 }
 
 export default class CalculatorButton<T extends CalculatorButtonProps> extends React.Component<T,{}> {
@@ -23,8 +24,9 @@ export default class CalculatorButton<T extends CalculatorButtonProps> extends R
                     className="calculator-button"
                     value={this.props.value}
                     onClick={() => {
-                        if (this.props.listener) {
-                            this.props.listener.update(this.props.value);
+                        if (this.props.commandObj) {
+                            console.log("commandObj");
+                            this.props.commandObj.execute(this.props.value);
                         }
                     }}
                 >

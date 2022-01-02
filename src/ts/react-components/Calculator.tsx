@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 import CalculatorButton, { CalculatorButtonProps } from "./CalculatorButton";
 import CalculatorDisplay from "./CalculatorDisplay";
 import iListener from "../iListener";
+import iCommand from "../iCommand";
 import {
     Col,
     ColProps,
@@ -31,36 +32,69 @@ enum CalculatorButtonValues {
     DOT=".",
 }
 
-class ColVals {
+class ColVals implements iCommand {
     public value: number|string;
     public colProps?: ColProps;
+    public ftn?: Function;
 
-    constructor(value: number|string, colProps?: ColProps) {
+    public execute(val?: any): void {
+        this.ftn && this.ftn(val);
+    }
+
+    constructor(value: number|string, colProps?: ColProps, ftn?: Function) {
         this.value = value;
         this.colProps = colProps || {};
+        this.ftn = ftn;
     }
 }
 
 type CalculatorState = {
     displayText: string,
+    previousVal?: string,
 }
 
-export default class Calculator extends React.Component<{}, CalculatorState> implements iListener {
+export default class Calculator extends React.Component<{}, CalculatorState> {
+
+    private static readonly MAX_DISPLAY_LENGTH = 28;
 
     state = {
         displayText: "",
+        previousVal: "",
     };
+
+    componentDidMount() {
+        window.addEventListener("keydown", (e) => {
+            if (Object.values(CalculatorButtonValues).includes(e.key as CalculatorButtonValues)) {
+                this.update(e.key as CalculatorButtonValues);
+            }
+        });
+    }
+
+    private createNumberButtonColVals(value: number|string, colProps?: ColProps) {
+        return new class extends ColVals {
+            constructor(value: number|string, superThis: Calculator, colProps?: ColProps) {
+                super(value, colProps);
+                this.ftn = (val: CalculatorButtonValues)=>superThis.update(val);
+            }
+        }(value, this, colProps);
+    }
+
+    private clear(): void {
+        this.setState(() => {
+            return {
+                previousVal: "",
+                displayText: "",
+            }
+        });
+    }
 
     public update(val: CalculatorButtonValues): void {
         console.log(`update(): ${val}`);
         this.setState(state => {
-            switch(val) {
-                case CalculatorButtonValues.AC:
-                    return { displayText: "" }
-                default:
-                    return { displayText: state.displayText + val }
+            if (this.state.displayText.length < Calculator.MAX_DISPLAY_LENGTH) {
+                return { displayText: state.displayText + val };
             }
-        })
+        });
     }
 
     public render(): JSX.Element {
@@ -77,30 +111,35 @@ export default class Calculator extends React.Component<{}, CalculatorState> imp
                 {
                     [
                         [
-                            new ColVals(CalculatorButtonValues.AC, {xs:{span:9}}),
+                            new ColVals(CalculatorButtonValues.AC, {xs:{span:9}}, ()=>this.clear()),
                             new ColVals(CalculatorButtonValues.DIVIDE, {xs:{span:3}}),
                         ],
                         [
-                            new ColVals(CalculatorButtonValues.ONE),
-                            new ColVals(CalculatorButtonValues.TWO),
-                            new ColVals(CalculatorButtonValues.THREE),
+                            this.createNumberButtonColVals(CalculatorButtonValues.ONE),
+                            this.createNumberButtonColVals(CalculatorButtonValues.TWO),
+                            this.createNumberButtonColVals(CalculatorButtonValues.THREE),
                             new ColVals(CalculatorButtonValues.MULTIPLY),
                         ],
                         [
-                            new ColVals(CalculatorButtonValues.FOUR),
-                            new ColVals(CalculatorButtonValues.FIVE),
-                            new ColVals(CalculatorButtonValues.SIX),
-                            new ColVals(CalculatorButtonValues.SUBTRACT)
+                            this.createNumberButtonColVals(CalculatorButtonValues.FOUR),
+                            this.createNumberButtonColVals(CalculatorButtonValues.FIVE),
+                            this.createNumberButtonColVals(CalculatorButtonValues.SIX),
+                            new ColVals(CalculatorButtonValues.SUBTRACT),
                         ],
                         [
-                            new ColVals(CalculatorButtonValues.SEVEN),
-                            new ColVals(CalculatorButtonValues.EIGHT),
-                            new ColVals(CalculatorButtonValues.NINE),
+                            this.createNumberButtonColVals(CalculatorButtonValues.SEVEN),
+                            this.createNumberButtonColVals(CalculatorButtonValues.EIGHT),
+                            this.createNumberButtonColVals(CalculatorButtonValues.NINE),
                             new ColVals(CalculatorButtonValues.ADD),
                         ],
                         [
-                            new ColVals(CalculatorButtonValues.ZERO, {xs:{span:6}}),
-                            new ColVals(CalculatorButtonValues.DOT, {xs:{span:3}}),
+                            this.createNumberButtonColVals(CalculatorButtonValues.ZERO, {xs:{span:6}}),
+                            new ColVals(CalculatorButtonValues.DOT, {xs:{span:3}}, (val: CalculatorButtonValues)=>{
+                                if (this.state.displayText &&
+                                    !this.state.displayText.includes(CalculatorButtonValues.DOT)) {
+                                    this.update(val);
+                                }
+                            }),
                             new ColVals(CalculatorButtonValues.EQUALS, {xs:{span:3}}),
                         ],
                     ].map((row, i) => (
@@ -115,7 +154,7 @@ export default class Calculator extends React.Component<{}, CalculatorState> imp
                                             >
                                                 <CalculatorButton
                                                     value={col.value}
-                                                    listener={this}
+                                                    commandObj={col}
                                                 />
                                             </Col>
                                         );
