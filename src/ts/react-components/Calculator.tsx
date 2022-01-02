@@ -10,8 +10,28 @@ import {
     Row,
 } from "react-bootstrap";
 
+enum CalculatorButtonValues {
+    ZERO="0",
+    ONE="1",
+    TWO="2",
+    THREE="3",
+    FOUR="4",
+    FIVE="5",
+    SIX="6",
+    SEVEN="7",
+    EIGHT="8",
+    NINE="9",
+    DIVIDE="/",
+    MULTIPLY="*",
+    SUBTRACT="-",
+    ADD="+",
+    EQUALS="=",
+    AC="AC",
+    DOT=".",
+}
+
 interface ColCalculatorButtonProps extends CalculatorButtonProps {
-    colProps?: ColProps
+    colProps?: ColProps,
 };
 
 class ColCalculatorButton extends CalculatorButton<ColCalculatorButtonProps> {
@@ -37,10 +57,26 @@ class ColVals {
     }
 }
 
-export default class Calculator extends React.Component<{},{}> implements iListener {
+type CalculatorState = {
+    displayText: string,
+}
 
-    public update(val: number): void {
+export default class Calculator extends React.Component<CalculatorState, {}> implements iListener {
+
+    state = {
+        displayText: "",
+    };
+
+    public update(val: CalculatorButtonValues): void {
         console.log(`update(): ${val}`);
+        this.setState(state => {
+            switch(val) {
+                case CalculatorButtonValues.AC:
+                    return { displayText: "" }
+                default:
+                    return { displayText: state.displayText + val }
+            }
+        })
     }
 
     public render(): JSX.Element {
@@ -49,19 +85,47 @@ export default class Calculator extends React.Component<{},{}> implements iListe
                 id="calculator"
                 fluid
             >
+                <Row>
+                    <Col>
+                        {this.state.displayText}
+                    </Col>
+                </Row>
                 {
                     [
-                        [new ColVals("AC", {xs:{span:9}}), new ColVals("/", {xs:{span:3}})],
-                        [new ColVals(1), new ColVals(2), new ColVals(3), new ColVals("*")],
-                        [new ColVals(4), new ColVals(5), new ColVals(6), new ColVals("-")],
-                        [new ColVals(7), new ColVals(8), new ColVals(9), new ColVals("+")],
-                        [new ColVals(0, {xs:{span:6}}), new ColVals(".", {xs:{span:3}}), new ColVals("=", {xs:{span:3}})],
-                    ].map(row => (
-                            <Row>
+                        [
+                            new ColVals(CalculatorButtonValues.AC, {xs:{span:9}}),
+                            new ColVals(CalculatorButtonValues.DIVIDE, {xs:{span:3}}),
+                        ],
+                        [
+                            new ColVals(CalculatorButtonValues.ONE),
+                            new ColVals(CalculatorButtonValues.TWO),
+                            new ColVals(CalculatorButtonValues.THREE),
+                            new ColVals(CalculatorButtonValues.MULTIPLY),
+                        ],
+                        [
+                            new ColVals(CalculatorButtonValues.FOUR),
+                            new ColVals(CalculatorButtonValues.FIVE),
+                            new ColVals(CalculatorButtonValues.SIX),
+                            new ColVals(CalculatorButtonValues.SUBTRACT)
+                        ],
+                        [
+                            new ColVals(CalculatorButtonValues.SEVEN),
+                            new ColVals(CalculatorButtonValues.EIGHT),
+                            new ColVals(CalculatorButtonValues.NINE),
+                            new ColVals(CalculatorButtonValues.ADD),
+                        ],
+                        [
+                            new ColVals(CalculatorButtonValues.ZERO, {xs:{span:6}}),
+                            new ColVals(CalculatorButtonValues.DOT, {xs:{span:3}}),
+                            new ColVals(CalculatorButtonValues.EQUALS, {xs:{span:3}}),
+                        ],
+                    ].map((row, i) => (
+                            <Row key={i}>
                                 {
-                                    row.map(col => {
+                                    row.map((col, j) => {
                                         return (
                                             <ColCalculatorButton
+                                                key={`${j}_${col.value}`}
                                                 value={col.value}
                                                 colProps={col.colProps}
                                                 listener={this}
