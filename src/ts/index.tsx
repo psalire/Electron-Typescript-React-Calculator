@@ -10,8 +10,8 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 300,
-        height: 300,
+        width: 275,
+        height: 275,
         webPreferences: {
             preload: path.join(__dirname, '..', 'renderer', 'main_window', 'preload.js'),
         },

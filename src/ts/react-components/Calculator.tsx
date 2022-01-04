@@ -33,8 +33,8 @@ enum CalculatorButtonValues {
 
 type CalculatorState = {
     displayText: string,
-    isOperationActive: boolean,
-    previousVal?: string,
+    previousVal: string,
+    activeOperation: Function|null,
 }
 
 export default class Calculator extends React.Component<{}, CalculatorState> {
@@ -42,7 +42,7 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
     state: CalculatorState = {
         displayText: "",
         previousVal: "",
-        isOperationActive: false,
+        activeOperation: null,
     };
 
     private static readonly MAX_DISPLAY_LENGTH = 28;
@@ -53,10 +53,9 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
         }
 
         public execute(val?: CalculatorButtonValues): void {
-            if (this.superThis.state.isOperationActive) {
+            if (this.superThis.state.activeOperation) {
                 this.superThis.setState({
                     displayText: "",
-                    isOperationActive: false,
                 });
             }
             if (this.superThis.state.displayText != "0") {
@@ -90,15 +89,16 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
 
         constructor(value: number|string, superThis: Calculator, operation: Function, colProps?: ColProps) {
             super(value, colProps, superThis);
-            this.operation = operation;
+            this.operation = (val1: string, val2: string) => {
+                return operation(parseFloat(val1 || "0"), parseFloat(val2)).toString();
+            };
         }
 
         public execute(_?: any) {
             this.superThis.setState((state: CalculatorState) => {
                 return {
                     previousVal: state.displayText,
-                    displayText: this.operation(state.previousVal, state.displayText),
-                    isOperationActive: true,
+                    activeOperation: this.operation,
                 }
             });
         }
@@ -109,7 +109,16 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
         }
 
         public execute(_?: any) {
-            console.log("=");
+            this.superThis.setState((state: CalculatorState) => {
+                if (state.activeOperation == null) {
+                    return;
+                }
+                return {
+                    previousVal: state.displayText,
+                    displayText: state.activeOperation(state.previousVal, state.displayText),
+                    activeOperation: null,
+                };
+            });
         }
     }
 
@@ -154,32 +163,32 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
                     [
                         [
                             new Calculator.ACColVals(this, {xs:{span:9}}),
-                            new Calculator.OperationColVals(CalculatorButtonValues.DIVIDE, this, (val1: string, val2: string) => {
-                                return (parseFloat(val1 || "0") / parseFloat(val2)).toString();
+                            new Calculator.OperationColVals(CalculatorButtonValues.DIVIDE, this, (val1: number, val2: number) => {
+                                return val1 / val2;
                             }),
                         ],
                         [
                             new Calculator.NumberButtonColVals(CalculatorButtonValues.ONE, this),
                             new Calculator.NumberButtonColVals(CalculatorButtonValues.TWO, this),
                             new Calculator.NumberButtonColVals(CalculatorButtonValues.THREE, this),
-                            new Calculator.OperationColVals(CalculatorButtonValues.MULTIPLY, this, (val1: string, val2: string) => {
-                                return (parseFloat(val1 || "0") * parseFloat(val2)).toString();
+                            new Calculator.OperationColVals(CalculatorButtonValues.MULTIPLY, this, (val1: number, val2: number) => {
+                                return val1 * val2;
                             }),
                         ],
                         [
                             new Calculator.NumberButtonColVals(CalculatorButtonValues.FOUR, this),
                             new Calculator.NumberButtonColVals(CalculatorButtonValues.FIVE, this),
                             new Calculator.NumberButtonColVals(CalculatorButtonValues.SIX, this),
-                            new Calculator.OperationColVals(CalculatorButtonValues.SUBTRACT, this, (val1: string, val2: string) => {
-                                return (parseFloat(val1 || "0") - parseFloat(val2)).toString();
+                            new Calculator.OperationColVals(CalculatorButtonValues.SUBTRACT, this, (val1: number, val2: number) => {
+                                return val1 - val2;
                             }),
                         ],
                         [
                             new Calculator.NumberButtonColVals(CalculatorButtonValues.SEVEN, this),
                             new Calculator.NumberButtonColVals(CalculatorButtonValues.EIGHT, this),
                             new Calculator.NumberButtonColVals(CalculatorButtonValues.NINE, this),
-                            new Calculator.OperationColVals(CalculatorButtonValues.ADD, this, (val1: string, val2: string) => {
-                                return (parseFloat(val1 || "0") + parseFloat(val2)).toString();
+                            new Calculator.OperationColVals(CalculatorButtonValues.ADD, this, (val1: number, val2: number) => {
+                                return val1 + val2;
                             }),
                         ],
                         [
