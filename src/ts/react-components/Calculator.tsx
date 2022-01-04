@@ -34,7 +34,8 @@ enum CalculatorButtonValues {
 type CalculatorState = {
     displayText: string,
     previousVal: string,
-    activeOperation: Function|null,
+    activeOperation: Function,
+    clearAfterInput: boolean,
 }
 
 export default class Calculator extends React.Component<{}, CalculatorState> {
@@ -42,7 +43,8 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
     state: CalculatorState = {
         displayText: "",
         previousVal: "",
-        activeOperation: null,
+        activeOperation: (_:any, val: string)=>val,
+        clearAfterInput: false,
     };
 
     private static readonly MAX_DISPLAY_LENGTH = 28;
@@ -53,9 +55,10 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
         }
 
         public execute(val?: CalculatorButtonValues): void {
-            if (this.superThis.state.activeOperation) {
+            if (this.superThis.state.clearAfterInput) {
                 this.superThis.setState({
                     displayText: "",
+                    clearAfterInput: false,
                 });
             }
             if (this.superThis.state.displayText != "0") {
@@ -98,7 +101,10 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
             this.superThis.setState((state: CalculatorState) => {
                 return {
                     previousVal: state.displayText,
-                    activeOperation: this.operation,
+                    activeOperation: (val1: string, val2: string) => {
+                        return this.operation(state.activeOperation(state.previousVal, val1), val2);
+                    },
+                    clearAfterInput: true,
                 }
             });
         }
@@ -110,13 +116,11 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
 
         public execute(_?: any) {
             this.superThis.setState((state: CalculatorState) => {
-                if (state.activeOperation == null) {
-                    return;
-                }
                 return {
                     previousVal: state.displayText,
                     displayText: state.activeOperation(state.previousVal, state.displayText),
-                    activeOperation: null,
+                    activeOperation: (_:any, val: string)=>val,
+                    clearAfterInput: true,
                 };
             });
         }
