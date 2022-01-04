@@ -1,9 +1,9 @@
 
 import React from "react";
 import ReactDOM from "react-dom";
-import CalculatorButton, { CalculatorButtonProps } from "./CalculatorButton";
+import ColValsFactory from "../ColValsFactory";
+import CalculatorButton from "./CalculatorButton";
 import CalculatorDisplay from "./CalculatorDisplay";
-import iCommand from "../iCommand";
 import {
     Col,
     ColProps,
@@ -31,22 +31,6 @@ enum CalculatorButtonValues {
     DOT=".",
 }
 
-class ColVals implements iCommand {
-    public value: number|string;
-    public colProps?: ColProps;
-    public ftn?: Function;
-
-    public execute(val?: any): void {
-        this.ftn && this.ftn(val);
-    }
-
-    constructor(value: number|string, colProps?: ColProps, ftn?: Function) {
-        this.value = value;
-        this.colProps = colProps || {};
-        this.ftn = ftn;
-    }
-}
-
 type CalculatorState = {
     displayText: string,
     isOperationActive: boolean,
@@ -55,13 +39,79 @@ type CalculatorState = {
 
 export default class Calculator extends React.Component<{}, CalculatorState> {
 
-    private static readonly MAX_DISPLAY_LENGTH = 28;
-
     state: CalculatorState = {
         displayText: "",
         previousVal: "",
         isOperationActive: false,
     };
+
+    private static readonly MAX_DISPLAY_LENGTH = 28;
+
+    private static NumberButtonColVals = class extends ColValsFactory {
+        constructor(value: number|string, superThis: Calculator, colProps?: ColProps) {
+            super(value, colProps, superThis);
+        }
+
+        public execute(val?: CalculatorButtonValues): void {
+            if (this.superThis.state.isOperationActive) {
+                this.superThis.setState({
+                    displayText: "",
+                    isOperationActive: false,
+                });
+            }
+            if (this.superThis.state.displayText != "0") {
+                this.superThis.update(val);
+            }
+        }
+    };
+    private static ACColVals = class extends ColValsFactory {
+        constructor(superThis: Calculator, colProps?: ColProps) {
+            super(CalculatorButtonValues.AC, colProps, superThis);
+        }
+
+        public execute(_?: any) {
+            this.superThis.clear();
+        }
+    };
+    private static DecimalColVals = class extends ColValsFactory {
+        constructor(superThis: Calculator, colProps?: ColProps) {
+            super(CalculatorButtonValues.DOT, colProps, superThis);
+        }
+
+        public execute(val: CalculatorButtonValues) {
+            if (this.superThis.state.displayText &&
+                !this.superThis.state.displayText.includes(CalculatorButtonValues.DOT)) {
+                this.superThis.update(val);
+            }
+        }
+    };
+    private static OperationColVals = class extends ColValsFactory {
+        private operation: Function;
+
+        constructor(value: number|string, superThis: Calculator, operation: Function, colProps?: ColProps) {
+            super(value, colProps, superThis);
+            this.operation = operation;
+        }
+
+        public execute(_?: any) {
+            this.superThis.setState((state: CalculatorState) => {
+                return {
+                    previousVal: state.displayText,
+                    displayText: this.operation(state.previousVal, state.displayText),
+                    isOperationActive: true,
+                }
+            });
+        }
+    };
+    private static EqualsColVals = class extends ColValsFactory {
+        constructor(superThis: Calculator, colProps?: ColProps) {
+            super(CalculatorButtonValues.EQUALS, colProps, superThis);
+        }
+
+        public execute(_?: any) {
+            console.log("=");
+        }
+    }
 
     componentDidMount() {
         window.addEventListener("keydown", (e) => {
@@ -69,40 +119,6 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
                 this.update(e.key as CalculatorButtonValues);
             }
         });
-    }
-
-    private createNumberButtonColVals(value: number|string, colProps?: ColProps) {
-        return new class extends ColVals {
-            constructor(value: number|string, superThis: Calculator, colProps?: ColProps) {
-                super(value, colProps);
-                this.ftn = (val: CalculatorButtonValues) => {
-                    if (superThis.state.isOperationActive) {
-                        superThis.setState({
-                            displayText: "",
-                            isOperationActive: false,
-                        });
-                    }
-                    superThis.update(val);
-                }
-            }
-        }(value, this, colProps);
-    }
-
-    private createOperationButtonColVals(value: number|string, operation: Function, colProps?: ColProps) {
-        return new class extends ColVals {
-            constructor(value: number|string, superThis: Calculator, colProps?: ColProps) {
-                super(value, colProps);
-                this.ftn = (_: any) => {
-                    superThis.setState(state => {
-                        return {
-                            previousVal: state.displayText,
-                            displayText: operation(state.previousVal, state.displayText),
-                            isOperationActive: true,
-                        }
-                    });
-                };
-            }
-        }(value, this, colProps);
     }
 
     private clear(): void {
@@ -137,38 +153,39 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
                 {
                     [
                         [
-                            new ColVals(CalculatorButtonValues.AC, {xs:{span:9}}, ()=>this.clear()),
-                            new ColVals(CalculatorButtonValues.DIVIDE, {xs:{span:3}}),
+                            new Calculator.ACColVals(this, {xs:{span:9}}),
+                            new Calculator.OperationColVals(CalculatorButtonValues.DIVIDE, this, (val1: string, val2: string) => {
+                                return (parseFloat(val1 || "0") / parseFloat(val2)).toString();
+                            }),
                         ],
                         [
-                            this.createNumberButtonColVals(CalculatorButtonValues.ONE),
-                            this.createNumberButtonColVals(CalculatorButtonValues.TWO),
-                            this.createNumberButtonColVals(CalculatorButtonValues.THREE),
-                            new ColVals(CalculatorButtonValues.MULTIPLY),
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.ONE, this),
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.TWO, this),
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.THREE, this),
+                            new Calculator.OperationColVals(CalculatorButtonValues.MULTIPLY, this, (val1: string, val2: string) => {
+                                return (parseFloat(val1 || "0") * parseFloat(val2)).toString();
+                            }),
                         ],
                         [
-                            this.createNumberButtonColVals(CalculatorButtonValues.FOUR),
-                            this.createNumberButtonColVals(CalculatorButtonValues.FIVE),
-                            this.createNumberButtonColVals(CalculatorButtonValues.SIX),
-                            new ColVals(CalculatorButtonValues.SUBTRACT),
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.FOUR, this),
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.FIVE, this),
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.SIX, this),
+                            new Calculator.OperationColVals(CalculatorButtonValues.SUBTRACT, this, (val1: string, val2: string) => {
+                                return (parseFloat(val1 || "0") - parseFloat(val2)).toString();
+                            }),
                         ],
                         [
-                            this.createNumberButtonColVals(CalculatorButtonValues.SEVEN),
-                            this.createNumberButtonColVals(CalculatorButtonValues.EIGHT),
-                            this.createNumberButtonColVals(CalculatorButtonValues.NINE),
-                            this.createOperationButtonColVals(CalculatorButtonValues.ADD, (val1: string, val2: string) => {
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.SEVEN, this),
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.EIGHT, this),
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.NINE, this),
+                            new Calculator.OperationColVals(CalculatorButtonValues.ADD, this, (val1: string, val2: string) => {
                                 return (parseFloat(val1 || "0") + parseFloat(val2)).toString();
                             }),
                         ],
                         [
-                            this.createNumberButtonColVals(CalculatorButtonValues.ZERO, {xs:{span:6}}),
-                            new ColVals(CalculatorButtonValues.DOT, {xs:{span:3}}, (val: CalculatorButtonValues)=>{
-                                if (this.state.displayText &&
-                                    !this.state.displayText.includes(CalculatorButtonValues.DOT)) {
-                                    this.update(val);
-                                }
-                            }),
-                            new ColVals(CalculatorButtonValues.EQUALS, {xs:{span:3}}),
+                            new Calculator.NumberButtonColVals(CalculatorButtonValues.ZERO, this, {xs:{span:6}}),
+                            new Calculator.DecimalColVals(this, {xs:{span:3}}),
+                            new Calculator.EqualsColVals(this, {xs:{span:3}}),
                         ],
                     ].map((row, i) => (
                             <Row key={i}>

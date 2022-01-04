@@ -24,7 +24,6 @@ export default class CalculatorButton<T extends CalculatorButtonProps> extends R
                     value={this.props.value}
                     onClick={() => {
                         if (this.props.commandObj) {
-                            console.log("commandObj");
                             this.props.commandObj.execute(this.props.value);
                         }
                     }}
