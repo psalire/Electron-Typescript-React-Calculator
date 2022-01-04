@@ -31,10 +31,17 @@ enum CalculatorButtonValues {
     DOT=".",
 }
 
+enum EvalState {
+    AWAITING_FIRST_OPERAND,
+    AWAITING_SECOND_OPERAND,
+    AWAITING_EVAL,
+}
+
 type CalculatorState = {
     displayText: string,
     previousVal: string,
     activeOperation: Function,
+    evalState: EvalState,
     clearAfterInput: boolean,
 }
 
@@ -44,6 +51,7 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
         displayText: "",
         previousVal: "",
         activeOperation: (_:any, val: string)=>val,
+        evalState: EvalState.AWAITING_FIRST_OPERAND,
         clearAfterInput: false,
     };
 
@@ -56,9 +64,19 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
 
         public execute(val?: CalculatorButtonValues): void {
             if (this.superThis.state.clearAfterInput) {
-                this.superThis.setState({
-                    displayText: "",
-                    clearAfterInput: false,
+                this.superThis.setState((state: CalculatorState) => {
+                    return {
+                        displayText: "",
+                        clearAfterInput: false,
+                        evalState: (() => {
+                            switch(state.evalState) {
+                                case EvalState.AWAITING_SECOND_OPERAND:
+                                    return EvalState.AWAITING_EVAL;
+                                default:
+                                    return state.evalState;
+                            }
+                        })(),
+                    }
                 });
             }
             if (this.superThis.state.displayText != "0") {
@@ -98,12 +116,26 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
         }
 
         public execute(_?: any) {
+            if (this.superThis.state.evalState == EvalState.AWAITING_EVAL) {
+                this.superThis.evaluate();
+            }
             this.superThis.setState((state: CalculatorState) => {
                 return {
                     previousVal: state.displayText,
-                    activeOperation: (val1: string, val2: string) => {
-                        return this.operation(state.activeOperation(state.previousVal, val1), val2);
-                    },
+                    activeOperation: this.operation,
+                    // activeOperation: (val1: string, val2: string) => {
+                    //     return this.operation(state.activeOperation(state.previousVal, val1), val2);
+                    // },
+                    evalState: (() => {
+                        switch (state.evalState) {
+                            case EvalState.AWAITING_FIRST_OPERAND:
+                                return EvalState.AWAITING_SECOND_OPERAND;
+                            case EvalState.AWAITING_SECOND_OPERAND:
+                                return EvalState.AWAITING_EVAL;
+                            default:
+                                return state.evalState;
+                        }
+                    })(),
                     clearAfterInput: true,
                 }
             });
@@ -115,14 +147,7 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
         }
 
         public execute(_?: any) {
-            this.superThis.setState((state: CalculatorState) => {
-                return {
-                    previousVal: state.displayText,
-                    displayText: state.activeOperation(state.previousVal, state.displayText),
-                    activeOperation: (_:any, val: string)=>val,
-                    clearAfterInput: true,
-                };
-            });
+            this.superThis.evaluate();
         }
     }
 
@@ -134,11 +159,25 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
         });
     }
 
+    private evaluate(): void {
+        this.setState((state: CalculatorState) => {
+            return {
+                previousVal: state.displayText,
+                displayText: state.activeOperation(state.previousVal, state.displayText),
+                activeOperation: (_:any, val: string)=>val,
+                evalState: EvalState.AWAITING_FIRST_OPERAND,
+                clearAfterInput: true,
+            };
+        });
+    }
+
     private clear(): void {
         this.setState(() => {
             return {
                 previousVal: "",
                 displayText: "",
+                evalState: EvalState.AWAITING_EVAL,
+                clearAfterInput: false,
             }
         });
     }
