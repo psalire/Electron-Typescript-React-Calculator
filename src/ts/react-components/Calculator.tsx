@@ -79,9 +79,11 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
                     }
                 });
             }
-            if (this.superThis.state.displayText != "0") {
-                this.superThis.update(val);
+            if (this.superThis.state.displayText == "0" &&
+               this.superThis.state.evalState != EvalState.AWAITING_SECOND_OPERAND) {
+                return;
             }
+            this.superThis.update(val);
         }
     };
     private static ACColVals = class extends ColValsFactory {
@@ -176,7 +178,7 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
             return {
                 previousVal: "",
                 displayText: "",
-                evalState: EvalState.AWAITING_EVAL,
+                evalState: EvalState.AWAITING_FIRST_OPERAND,
                 clearAfterInput: false,
             }
         });
