@@ -154,11 +154,7 @@ export default class Calculator extends React.Component<{}, CalculatorState> {
     }
 
     componentDidMount() {
-        // window.addEventListener("keydown", (e) => {
-        //     if (Object.values(CalculatorButtonValues).includes(e.key as CalculatorButtonValues)) {
-        //         this.update(e.key as CalculatorButtonValues);
-        //     }
-        // });
+        
     }
 
     private evaluate(): void {

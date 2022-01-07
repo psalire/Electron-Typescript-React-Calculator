@@ -11,7 +11,6 @@ ReactDOM.render(
     document.querySelector("#main-container")
 );
 
-// ReactDOM.render(
-//     <div>Footer</div>,
-//     document.querySelector("#footer-container")
-// )
+document.querySelector("#close-button").addEventListener("click", () => {
+    window.ipcClose.exit();
+});

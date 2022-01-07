@@ -1,6 +1,7 @@
 import {
     app,
     BrowserWindow,
+    ipcMain,
     Menu,
 } from "electron";
 import * as path from "path";
@@ -11,8 +12,8 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 const createWindow = () => {
     const win = new BrowserWindow({
-        width: 250,
-        height: 194,
+        width: 200,
+        height: 228,
         frame: false,
         webPreferences: {
             preload: path.join(__dirname, '..', 'renderer', 'main_window', 'preload.js'),
@@ -23,7 +24,11 @@ const createWindow = () => {
 
     win.setMenu(new Menu()); // Empty menu
 
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
+
+    ipcMain.handle("ipc-close:exit", () => {
+        app.quit();
+    });
 };
 
 app.whenReady().then(() => {
