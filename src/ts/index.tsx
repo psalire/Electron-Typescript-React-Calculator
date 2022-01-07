@@ -12,7 +12,8 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 const createWindow = () => {
     const win = new BrowserWindow({
         width: 250,
-        height: 250,
+        height: 194,
+        frame: false,
         webPreferences: {
             preload: path.join(__dirname, '..', 'renderer', 'main_window', 'preload.js'),
         },
@@ -22,7 +23,7 @@ const createWindow = () => {
 
     win.setMenu(new Menu()); // Empty menu
 
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
 };
 
 app.whenReady().then(() => {

@@ -2,6 +2,14 @@
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
 
+body {
+    -webkit-app-region: drag;
+}
+
+button {
+    -webkit-app-region: no-drag;
+}
+
 #calculator.row {
     @extend .m-0;
 }
