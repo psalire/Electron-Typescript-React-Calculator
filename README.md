@@ -1,6 +1,6 @@
 # Calculator with Electron, TypeScript, React
 
-An exercise in Electron. Electron is a cross-platform framework for desktop applications that runs off of Chromium. This allows a web development skillset to be applied for developing desktop applications across multiple platforms.
+An exercise in Electron. Electron is a cross-platform framework for desktop applications that runs off of Chromium. This allows a web development skillset to be applied to developing desktop applications across multiple platforms.
 
 ## Install
 
