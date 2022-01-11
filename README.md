@@ -10,3 +10,5 @@ npm run build-pug
 npm run build-preload
 npm start
 ```
+
+![Screenshot](screenshot.jpg)
